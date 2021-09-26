@@ -87,10 +87,15 @@ namespace ThiefVladislavBot
             Console.WriteLine($"The message was sent with id: {sentMessage.MessageId}");
 
 
-            static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message, Tuple<string, ReplyKeyboardMarkup> toSend)
+            static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message, Tuple<string, ReplyKeyboardMarkup, string> toSend)
             {
                 if (toSend.Item1 == "")
                     return await botClient.SendStickerAsync(chatId: message.Chat.Id, sticker: "https://cdn.tlgrm.app/stickers/d06/e20/d06e2057-5c13-324d-b94f-9b5a0e64f2da/192/2.webp", replyMarkup: toSend.Item2);
+                if (toSend.Item3 != "https://www.amigoss.eu/wp-content/uploads/2019/01/Amigos_mockup_pyzy_z_miesem_1.png")
+                    await botClient.SendStickerAsync(chatId: message.Chat.Id, sticker: toSend.Item3);
+                else
+                    await botClient.SendPhotoAsync(chatId: message.Chat.Id, photo: "https://www.amigoss.eu/wp-content/uploads/2019/01/Amigos_mockup_pyzy_z_miesem_1.png");
+
 
                 return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
                                                             text: toSend.Item1,

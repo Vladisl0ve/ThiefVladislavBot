@@ -3,24 +3,68 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ThiefVladislavBot
 {
     public class Game
     {
-        public List<string> Locations { get; set; }
-        public bool IsKey { get; set; }
+        public List<string> LocationsToGo { get; set; }
+        public string LocationRightNow { get; set; }
+        public List<string> AllLocations { get; } = new List<string>()
+        {
+            "Осмотреться",
+            "Зал",
+            "Туалет",
+            "Рискнуть и зайти в туалет",
+            "Вернуться в прихожую",
+            "Пойти в туалет",
+            "Пойти в зал",
+            "Застелить постель",
+            "Отойти от постели",
+            "Расстелить обратно",
+            "Снова застелить постель",
+            "Пойти на кухню",
+            "Выпрыгнуть в окно",
+            "Бегом в прихожую",
+            "КОНЕЦ.",
+            "Бросить в дядю ржавым ключом",
+            "Бросить в дядю золотым ключом",
+            "Убежать в зал",
+            "Убежать в туалет",
+            "Вернуться в зал",
+            "Вспомнить лучшие моменты жизни",
+            "Отойти от холодильника",
+            "Попробовать открыть ржавым ключом"
+        };
+        public bool IsGoldenKey { get; set; }
+        public bool DidAttackByGoldenKey { get; set; }
+        public bool IsRustyKey { get; set; }
+        public bool DidAttackByRustyKey { get; set; }
         public bool IsOver { get; set; }
+        public bool IsWCVisited { get; set; }
+        public bool IsMadeBed { get; set; }
+        public bool IsUnmadeBed { get; set; }
+        public bool IsRaidMode { get; set; }
+        private string _lastWords = "";
 
         public Game()
         {
-            Locations = new List<string>() { "Zal", "Tualet", "Komnata" };
-            IsKey = false;
+            LocationsToGo = new List<string>() { "Осмотреться", "Зал", "Туалет" };
+            LocationRightNow = "Прихожая";
+            IsGoldenKey = false;
+            IsRustyKey = false;
             IsOver = false;
+            IsWCVisited = false;
+            IsMadeBed = false;
+            IsUnmadeBed = false;
+            DidAttackByRustyKey = false;
+            DidAttackByGoldenKey = false;
+            IsRaidMode = false;
         }
 
-        private KeyboardButton[][] KeyboardOptimizer(List<string> names)
+        private ReplyKeyboardMarkup KeyboardOptimizer(List<string> names)
         {
             int x = 2;
             int y = (int)Math.Ceiling((double)(names.Count) / x);
@@ -46,17 +90,194 @@ namespace ThiefVladislavBot
             for (int i = 0; i < names.Count; i++)
                 keyboard[i / x][i % x] = names[i];
 
-            return keyboard;
+
+
+            return new ReplyKeyboardMarkup(keyboard) { ResizeKeyboard = true };
         }
 
         public Tuple<string, ReplyKeyboardMarkup> StartGame()
         {
-            string text = "Darova, idi svoiej dorogoi, Stalker";
-            var keyboard = new ReplyKeyboardMarkup(KeyboardOptimizer(Locations))
-            {
-                ResizeKeyboard = true
-            };
+            string text = "Вы вор Владислав. Вы забрались в квартиру своего дяди в шабанах и стоите в прихожей.";
+            _lastWords = text;
+            var keyboard = KeyboardOptimizer(LocationsToGo);
             return new Tuple<string, ReplyKeyboardMarkup>(text, keyboard);
+        }
+
+        public Tuple<string, ReplyKeyboardMarkup> NextTurn(Message message)
+        {
+            LocationRightNow = message.Text;
+            string textToSay = "";
+
+            switch (LocationRightNow)
+            {
+                case "Осмотреться":
+                    textToSay = "Перестань осматриваться, действуй.";
+                    LocationsToGo = new List<string>() { "Пойти в туалет", "Пойти в зал" };
+                    break;
+                case "Пойти в туалет":
+                case "Туалет":
+                    if (IsWCVisited)
+                    {
+                        textToSay = "В туалете больше нет ничего ценного. Шорох из трубы кажется уже не таким подозрительным.";
+                        LocationsToGo = new List<string>() { "Вернуться в прихожую" };
+                        break;
+                    }
+                    else
+                    {
+                        textToSay = "Только вы приблизились к двери, как услышали за ней подозрительный шорох. Возможно это ваш дядя и если он вас увидит, то вам несдобровать.";
+                        LocationsToGo = new List<string>() { "Рискнуть и зайти в туалет", "Вернуться в прихожую" };
+                        break;
+                    }
+                case "Рискнуть и зайти в туалет":
+                    IsWCVisited = true;
+                    IsGoldenKey = true;
+                    textToSay = "Подозрительным шорохом оказалась течь в проржавевшей трубе. А еще вы нашли золотой ключ.";
+                    LocationsToGo = new List<string>() { "Вернуться в прихожую" };
+                    break;
+                case "Вернуться в прихожую":
+                    textToSay = "Вы все еще вор Владислав и стоите в прихожей своего дяди. В шабанах.";
+                    LocationsToGo = new List<string>() { "Осмотреться", "Зал", "Туалет" };
+                    break;
+                case "Вернуться в зал":
+                case "Пойти в зал":
+                case "Зал":
+                    if (IsUnmadeBed || !IsMadeBed)
+                    {
+                        textToSay = "Вы тихо зашли в зал. Окна завешаны. Постель не заправлена. Дяди нет.";
+                        LocationsToGo = new List<string>() { "Пойти на кухню", "Застелить постель", "Вернуться в прихожую" };
+                        break;
+                    }
+                    else
+                    {
+                        textToSay = "Вы тихо зашли в зал. Окна завешаны. Постель заправлена. Дяди нет.";
+                        LocationsToGo = new List<string>() { "Пойти на кухню", "Расстелить постель", "Вернуться в прихожую" };
+                        break;
+                    }
+                case "Снова застелить постель":
+                case "Застелить постель":
+                    if (!IsMadeBed)
+                    {
+                        IsRustyKey = true;
+                        IsMadeBed = true;
+                        textToSay = "Молодец. Вы застелили дядину постель. А на полу нашли ржавый ключ.";
+                        LocationsToGo = new List<string>() { "Отойти от постели", "Расстелить обратно" };
+                        break;
+                    }
+                    else
+                    {
+                        textToSay = "Только вы подровнаяли уголки одеяла, как вдруг услышали шум из прихожей.";
+                        IsRaidMode = true;
+                        LocationsToGo = new List<string>() { "Выпрыгнуть в окно", "Бегом в прихожую" };
+                        break;
+                    }
+                case "Отойти от постели":
+                    if (IsMadeBed)
+                    {
+                        textToSay = "Вы тихо зашли в зал. Окна завешаны. Постель заправлена. Дяди нет.";
+                        LocationsToGo = new List<string>() { "Пойти на кухню", "Расстелить постель", "Вернуться в прихожую" };
+                    }
+                    if (IsUnmadeBed)
+                    {
+                        textToSay = "Вы тихо зашли в зал. Окна завешаны. Постель не заправлена. Дяди нет.";
+                        LocationsToGo = new List<string>() { "Пойти на кухню", "Застелить постель", "Вернуться в прихожую" };
+                    }
+                    break;
+                case "Расстелить обратно":
+                case "Расстелить постель":
+                    textToSay = "Вы вернули постель в прежнее состояние.";
+                    IsUnmadeBed = true;
+                    LocationsToGo = new List<string>() { "Снова застелить постель", "Отойти от постели" };
+                    break;
+                case "Выпрыгнуть в окно":
+                    textToSay = "Вы не взяли во внимание, что дядя живет на 6ом этаже. Вы разбились и умерли.";
+                    LocationsToGo = new List<string>() { "КОНЕЦ." };
+                    break;
+                case "Бегом в прихожую":
+                    textToSay = "Оказавшись в прихожей вы увидели только что вернувшегося дядю.\nКажется он вас видит...";
+                    if (IsRustyKey)
+                        LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет", "Бросить в дядю ржавым ключом" };
+                    if (IsGoldenKey)
+                        LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет", "Бросить в дядю ржавым ключом", "Бросить в дядю золотым ключом" };
+                    break;
+                case "Убежать в зал":
+                    textToSay = "У вас нет времени на раздумья, надо действовать.";
+                    LocationsToGo = new List<string>() { "Выпрыгнуть в окно", "Бегом на кухню" };
+                    break;
+                case "Убежать в туалет":
+                    textToSay = "Дядя медленно зашел в туалет. Медленно закрыл дверь. Медленно достал дробовик. И быстро распределил ваши внутренности по кафельной плитке.";
+                    LocationsToGo = new List<string>() { "КОНЕЦ." };
+                    break;
+                case "Бросить в дядю ржавым ключом":
+                    textToSay = "Теперь он вас точно заметил. Браво!";
+                    DidAttackByRustyKey = true;
+                    if (IsGoldenKey)
+                        LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет", "Бросить в дядю золотым ключом и убежать в туалет" };
+                    LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет" };
+
+                    break;
+                case "Бросить в дядю золотым ключом":
+                    DidAttackByGoldenKey = true;
+                    textToSay = "Теперь он вас точно заметил. Браво!";
+                    LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет", "Бросить в дядю ржавым ключом и убежать в туалет" };
+                    break;
+                case "Пойти на кухню":
+                case "Отойти от холодильника":
+                    textToSay = "Перед вами холодильник с замком.";
+                    LocationsToGo = new List<string>() { "Попробовать открыть", "Вернуться в зал" };
+                    if (IsGoldenKey)
+                        LocationsToGo = new List<string>() { "Попробовать открыть золотым ключом", "Вернуться в зал" };
+                    if (IsRustyKey)
+                        LocationsToGo = new List<string>() { "Попробовать открыть ржавым ключом", "Вернуться в зал" };
+                    if (IsRustyKey && IsGoldenKey)
+                        LocationsToGo = new List<string>() { "Попробовать открыть золотым ключом", "Попробовать открыть ржавым ключом", "Вернуться в зал" };
+                    break;
+                case "Бегом на кухню":
+                    textToSay = "Перед вами холодильник с замком.";
+                    if (IsGoldenKey)
+                        LocationsToGo = new List<string>() { "Попробовать открыть ржавым ключом", "Попробовать открыть золотым ключом" };
+                    else
+                        LocationsToGo = new List<string>() { "Попробовать открыть ржавым ключом" };
+                    break;
+                case "Попробовать открыть":
+                case "Попробовать открыть золотым ключом":
+                    if (IsRaidMode)
+                    {
+                        textToSay = "Заперто. Времени больше не осталось. Вы в тупике.";
+                        LocationsToGo = new List<string>() { "Вспомнить лучшие моменты жизни" };
+                        break;
+                    }
+                    else
+                    {
+                        textToSay = "Заперто.";
+                        LocationsToGo = new List<string>() { "Отойти от холодильника" };
+                        break;
+                    }
+                case "КОНЕЦ.":
+                    textToSay = "";
+                    LocationsToGo = new List<string>() { "КОНЕЦ?" };
+                    IsOver = true;
+                    break;
+                case "":
+                    textToSay = "";
+                    LocationsToGo = new List<string>() { "КОНЕЦ." };
+                    break;
+                case "Вспомнить лучшие моменты жизни":
+                    textToSay = "Дядя медленно зашел на кухню. Медленно закрыл дверь. Медленно достал дробовик. И быстро распределил ваши внутренности по дверце холодильника.";
+                    LocationsToGo = new List<string>() { "КОНЕЦ." };
+                    break;
+                case "Попробовать открыть ржавым ключом":
+                    textToSay = "Пызы.";
+                    LocationsToGo = new List<string>() { "Good Ending" };
+                    IsOver = true;
+                    break;
+                default:
+                    textToSay = _lastWords;
+                    break;
+            }
+            _lastWords = textToSay;
+           
+            return new Tuple<string, ReplyKeyboardMarkup>(textToSay, KeyboardOptimizer(LocationsToGo));
+
         }
 
 

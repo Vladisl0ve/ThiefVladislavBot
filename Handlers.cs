@@ -71,10 +71,11 @@ namespace ThiefVladislavBot
             }
             else if (!sessions[idSender].IsOver)
             {
-                action = SendReplyKeyboard(botClient, message, sessions[idSender].StartGame());
+                action = SendReplyKeyboard(botClient, message, sessions[idSender].NextTurn(message));
             }
             else
             {
+                sessions[idSender] = new Game();
                 action = SendReplyKeyboard(botClient, message, sessions[idSender].StartGame());
             }
 
@@ -85,38 +86,12 @@ namespace ThiefVladislavBot
             var sentMessage = await action;
             Console.WriteLine($"The message was sent with id: {sentMessage.MessageId}");
 
-            // Send inline keyboard
-            // You can process responses in BotOnCallbackQueryReceived handler
-            static async Task<Message> SendInlineKeyboard(ITelegramBotClient botClient, Message message)
-            {
-                await botClient.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
-
-                // Simulate longer running task
-                await Task.Delay(500);
-
-                var inlineKeyboard = new InlineKeyboardMarkup(new[]
-                {
-                    // first row
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData("1.1", "11"),
-                        InlineKeyboardButton.WithCallbackData("1.2", "12"),
-                    },
-                    // second row
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData("2.1", "21"),
-                        InlineKeyboardButton.WithCallbackData("2.2", "22"),
-                    },
-                });
-
-                return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-                                                            text: "Choose",
-                                                            replyMarkup: inlineKeyboard);
-            }
 
             static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message, Tuple<string, ReplyKeyboardMarkup> toSend)
             {
+                if (toSend.Item1 == "")
+                    return await botClient.SendStickerAsync(chatId: message.Chat.Id, sticker: "https://cdn.tlgrm.app/stickers/d06/e20/d06e2057-5c13-324d-b94f-9b5a0e64f2da/192/2.webp", replyMarkup: toSend.Item2);
+
                 return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
                                                             text: toSend.Item1,
                                                             replyMarkup: toSend.Item2);
@@ -140,33 +115,6 @@ namespace ThiefVladislavBot
                 return await botClient.SendPhotoAsync(chatId: message.Chat.Id,
                                                       photo: new InputOnlineFile(fileStream, fileName),
                                                       caption: "Nice Picture");
-            }
-
-            static async Task<Message> RequestContactAndLocation(ITelegramBotClient botClient, Message message)
-            {
-                var RequestReplyKeyboard = new ReplyKeyboardMarkup(new[]
-                {
-                    KeyboardButton.WithRequestLocation("Location"),
-                    KeyboardButton.WithRequestContact("Contact"),
-                });
-
-                return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-                                                            text: "Who or Where are you?",
-                                                            replyMarkup: RequestReplyKeyboard);
-            }
-
-            static async Task<Message> Usage(ITelegramBotClient botClient, Message message)
-            {
-                const string usage = "Usage:\n" +
-                                     "/inline   - send inline keyboard\n" +
-                                     "/keyboard - send custom keyboard\n" +
-                                     "/remove   - remove custom keyboard\n" +
-                                     "/photo    - send a photo\n" +
-                                     "/request  - request location or contact";
-
-                return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-                                                            text: usage,
-                                                            replyMarkup: new ReplyKeyboardRemove());
             }
         }
 

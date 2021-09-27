@@ -207,6 +207,7 @@ namespace ThiefVladislavBot
                 case "Выпрыгнуть в окно":
                     textToSay = "Вы не взяли во внимание, что дядя живет на 6ом этаже. Вы разбились и умерли.";
                     LocationsToGo = new List<string>() { "КОНЕЦ." };
+                    sticker = "https://tlgrm.ru/_/stickers/4dd/300/4dd300fd-0a89-3f3d-ac53-8ec93976495e/192/66.webp";
                     break;
                 case "Бегом в прихожую":
                     textToSay = "Оказавшись в прихожей вы увидели только что вернувшегося дядю.\nКажется он вас видит...";
@@ -214,7 +215,7 @@ namespace ThiefVladislavBot
                         LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет", "Бросить в дядю ржавым ключом" };
                     if (IsGoldenKey)
                         LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет", "Бросить в дядю ржавым ключом", "Бросить в дядю золотым ключом" };
-                    sticker = "https://tlgrm.ru/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/192/61.webp";
+                    sticker = "https://cdn.tlgrm.app/stickers/e3a/27d/e3a27d19-e86a-4932-9a27-1bbcca58d75a/192/1.webp";
                     break;
                 case "Убежать в зал":
                     textToSay = "У вас нет времени на раздумья, надо действовать.";
@@ -226,6 +227,7 @@ namespace ThiefVladislavBot
                 case "Бросить в дядю золотым ключом и убежать в туалет":
                     textToSay = "Дядя медленно зашел в туалет. Медленно закрыл дверь. Медленно достал дробовик. И быстро распределил ваши внутренности по кафельной плитке.";
                     LocationsToGo = new List<string>() { "КОНЕЦ." };
+                    sticker = "https://tlgrm.ru/_/stickers/e3a/27d/e3a27d19-e86a-4932-9a27-1bbcca58d75a/192/20.webp";
                     break;
                 case "Бросить в дядю ржавым ключом":
                     textToSay = "Теперь он вас точно заметил. Браво!";
@@ -293,7 +295,7 @@ namespace ThiefVladislavBot
                 case "Вспомнить лучшие моменты жизни":
                     textToSay = "Дядя медленно зашел на кухню. Медленно закрыл дверь. Медленно достал дробовик. И быстро распределил ваши внутренности по дверце холодильника.";
                     LocationsToGo = new List<string>() { "КОНЕЦ." };
-                    sticker = "https://tlgrm.ru/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/192/49.webp";
+                    sticker = "https://cdn.tlgrm.app/stickers/e3a/27d/e3a27d19-e86a-4932-9a27-1bbcca58d75a/192/2.webp";
                     break;
                 case "Попробовать открыть ржавым ключом":
                     textToSay = "Пызы.";

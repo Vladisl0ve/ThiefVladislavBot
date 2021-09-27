@@ -65,7 +65,7 @@ namespace ThiefVladislavBot
             if (!sessions.ContainsKey(idSender))
             {
                 sessions.Add(idSender, new Game());
-                Console.WriteLine($"{message.From.FirstName} started new game");
+                Console.WriteLine($"{DateTime.Now:G} {message.From.FirstName} {message.From.LastName} @{message.From.Username} started new game");
                 action = SendReplyKeyboard(botClient, message, sessions[idSender].StartGame());
 
             }
@@ -80,22 +80,31 @@ namespace ThiefVladislavBot
             }
 
 
-            Console.WriteLine($"Receive message type: {message.Type}");
+
             if (message.Type != MessageType.Text)
+            {
+                Console.WriteLine($"{DateTime.Now:G} Receive message type: {message.Type}");
+                Console.WriteLine($"{DateTime.Now:G} The message was sent to: @{message.Chat.Username}");
                 return;
+            }
             var sentMessage = await action;
-            Console.WriteLine($"The message was sent with id: {sentMessage.MessageId}");
+            Console.WriteLine($"{DateTime.Now:G} Sent to: @{message.Chat.Username} - '{sentMessage.Text.Substring(0, sentMessage.Text.Length > 20 ? 20 : sentMessage.Text.Length)}'");
 
 
             static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message, Tuple<string, ReplyKeyboardMarkup, string> toSend)
             {
                 if (toSend.Item1 == "")
+                {
+                    Console.WriteLine($"{DateTime.Now:G} Bad ending by: @{message.Chat.Username}");
                     return await botClient.SendStickerAsync(chatId: message.Chat.Id, sticker: "https://cdn.tlgrm.app/stickers/d06/e20/d06e2057-5c13-324d-b94f-9b5a0e64f2da/192/2.webp", replyMarkup: toSend.Item2);
+                }
                 if (toSend.Item3 != "https://www.amigoss.eu/wp-content/uploads/2019/01/Amigos_mockup_pyzy_z_miesem_1.png")
                     await botClient.SendStickerAsync(chatId: message.Chat.Id, sticker: toSend.Item3);
                 else
+                {
+                    Console.WriteLine($"{DateTime.Now:G} Good ending by:@ {message.Chat.Username}");
                     await botClient.SendPhotoAsync(chatId: message.Chat.Id, photo: "https://www.amigoss.eu/wp-content/uploads/2019/01/Amigos_mockup_pyzy_z_miesem_1.png");
-
+                }
 
                 return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
                                                             text: toSend.Item1,

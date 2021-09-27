@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
-using Telegram.Bot.Args;
 using Telegram.Bot.Extensions.Polling;
 
 namespace ThiefVladislavBot
@@ -13,6 +12,7 @@ namespace ThiefVladislavBot
     {
         private static TelegramBotClient Bot;
         private static IConfigurationRoot Config;
+
         public static async Task Main()
         {
             Config = new ConfigurationBuilder()

@@ -67,7 +67,6 @@ namespace ThiefVladislavBot
                 sessions.Add(idSender, new Game());
                 Console.WriteLine($"{DateTime.Now:G} {message.From.FirstName} {message.From.LastName} @{message.From.Username} started new game");
                 action = SendReplyKeyboard(botClient, message, sessions[idSender].StartGame());
-
             }
             else if (!sessions[idSender].IsOver)
             {
@@ -79,8 +78,6 @@ namespace ThiefVladislavBot
                 action = SendReplyKeyboard(botClient, message, sessions[idSender].StartGame());
             }
 
-
-
             if (message.Type != MessageType.Text)
             {
                 Console.WriteLine($"{DateTime.Now:G} Receive message type: {message.Type}");
@@ -89,7 +86,6 @@ namespace ThiefVladislavBot
             }
             var sentMessage = await action;
             Console.WriteLine($"{DateTime.Now:G} Sent to: @{message.Chat.Username} - '{sentMessage.Text.Substring(0, sentMessage.Text.Length > 20 ? 20 : sentMessage.Text.Length)}'");
-
 
             static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message, Tuple<string, ReplyKeyboardMarkup, string> toSend)
             {

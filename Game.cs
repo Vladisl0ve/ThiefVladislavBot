@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
@@ -12,6 +9,7 @@ namespace ThiefVladislavBot
     {
         public List<string> LocationsToGo { get; set; }
         public string LocationRightNow { get; set; }
+
         public List<string> AllLocations { get; } = new List<string>()
         {
             "Осмотреться",
@@ -38,6 +36,7 @@ namespace ThiefVladislavBot
             "Отойти от холодильника",
             "Попробовать открыть ржавым ключом"
         };
+
         public bool IsGoldenKey { get; set; }
         public bool DidAttackByGoldenKey { get; set; }
         public bool IsRustyKey { get; set; }
@@ -91,8 +90,6 @@ namespace ThiefVladislavBot
             for (int i = 0; i < names.Count; i++)
                 keyboard[i / x][i % x] = names[i];
 
-
-
             return new ReplyKeyboardMarkup(keyboard) { ResizeKeyboard = true };
         }
 
@@ -119,6 +116,7 @@ namespace ThiefVladislavBot
                     LocationsToGo = new List<string>() { "Пойти в туалет", "Пойти в зал" };
                     sticker = "https://tlgrm.ru/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/192/59.webp";
                     break;
+
                 case "Пойти в туалет":
                 case "Туалет":
                     if (IsWCVisited)
@@ -142,11 +140,13 @@ namespace ThiefVladislavBot
                     LocationsToGo = new List<string>() { "Вернуться в прихожую" };
                     sticker = "https://tlgrm.ru/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/192/51.webp";
                     break;
+
                 case "Вернуться в прихожую":
                     textToSay = "Вы все еще вор Владислав и стоите в прихожей своего дяди. В шабанах.";
                     LocationsToGo = new List<string>() { "Осмотреться", "Зал", "Туалет" };
                     sticker = "https://tlgrm.ru/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/192/52.webp";
                     break;
+
                 case "Вернуться в зал":
                 case "Пойти в зал":
                 case "Зал":
@@ -197,6 +197,7 @@ namespace ThiefVladislavBot
                         sticker = "https://cdn.tlgrm.app/stickers/38b/6ab/38b6abb4-854c-39ff-806f-4e6f1f4cd9ff/192/3.webp";
                     }
                     break;
+
                 case "Расстелить обратно":
                 case "Расстелить постель":
                     textToSay = "Вы вернули постель в прежнее состояние.";
@@ -204,11 +205,13 @@ namespace ThiefVladislavBot
                     LocationsToGo = new List<string>() { "Снова застелить постель", "Отойти от постели" };
                     sticker = "https://cdn.tlgrm.app/stickers/844/c8e/844c8ee0-e7d3-4c34-90cb-e48c466b2315/192/6.webp";
                     break;
+
                 case "Выпрыгнуть в окно":
                     textToSay = "Вы не взяли во внимание, что дядя живет на 6ом этаже. Вы разбились и умерли.";
                     LocationsToGo = new List<string>() { "КОНЕЦ." };
                     sticker = "https://tlgrm.ru/_/stickers/4dd/300/4dd300fd-0a89-3f3d-ac53-8ec93976495e/192/66.webp";
                     break;
+
                 case "Бегом в прихожую":
                     textToSay = "Оказавшись в прихожей вы увидели только что вернувшегося дядю.\nКажется он вас видит...";
                     if (IsRustyKey)
@@ -217,11 +220,13 @@ namespace ThiefVladislavBot
                         LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет", "Бросить в дядю ржавым ключом", "Бросить в дядю золотым ключом" };
                     sticker = "https://cdn.tlgrm.app/stickers/e3a/27d/e3a27d19-e86a-4932-9a27-1bbcca58d75a/192/1.webp";
                     break;
+
                 case "Убежать в зал":
                     textToSay = "У вас нет времени на раздумья, надо действовать.";
                     LocationsToGo = new List<string>() { "Выпрыгнуть в окно", "Бегом на кухню" };
                     sticker = "https://tlgrm.ru/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/192/69.webp";
                     break;
+
                 case "Убежать в туалет":
                 case "Бросить в дядю ржавым ключом и убежать в туалет":
                 case "Бросить в дядю золотым ключом и убежать в туалет":
@@ -229,6 +234,7 @@ namespace ThiefVladislavBot
                     LocationsToGo = new List<string>() { "КОНЕЦ." };
                     sticker = "https://tlgrm.ru/_/stickers/e3a/27d/e3a27d19-e86a-4932-9a27-1bbcca58d75a/192/20.webp";
                     break;
+
                 case "Бросить в дядю ржавым ключом":
                     textToSay = "Теперь он вас точно заметил. Браво!";
                     DidAttackByRustyKey = true;
@@ -237,12 +243,14 @@ namespace ThiefVladislavBot
                         LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет", "Бросить в дядю золотым ключом и убежать в туалет" };
                     sticker = "https://tlgrm.ru/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/192/70.webp";
                     break;
+
                 case "Бросить в дядю золотым ключом":
                     DidAttackByGoldenKey = true;
                     textToSay = "Теперь он вас точно заметил. Браво!";
                     LocationsToGo = new List<string>() { "Убежать в зал", "Убежать в туалет", "Бросить в дядю ржавым ключом и убежать в туалет" };
                     sticker = "https://tlgrm.ru/_/stickers/8a1/9aa/8a19aab4-98c0-37cb-a3d4-491cb94d7e12/192/66.webp";
                     break;
+
                 case "Пойти на кухню":
                 case "Отойти от холодильника":
                     textToSay = "Перед вами холодильник с замком.";
@@ -255,6 +263,7 @@ namespace ThiefVladislavBot
                         LocationsToGo = new List<string>() { "Попробовать открыть золотым ключом", "Попробовать открыть ржавым ключом", "Вернуться в зал" };
                     sticker = "https://tlgrm.ru/_/stickers/9e5/bbe/9e5bbe60-32fe-34e3-a413-e9bb4538ae9e/192/13.webp";
                     break;
+
                 case "Бегом на кухню":
                     textToSay = "Перед вами холодильник с замком.";
                     if (IsGoldenKey && !DidAttackByGoldenKey && !DidAttackByRustyKey)
@@ -267,6 +276,7 @@ namespace ThiefVladislavBot
                         LocationsToGo = new List<string>() { "Попробовать открыть" };
                     sticker = "https://tlgrm.ru/_/stickers/9e5/bbe/9e5bbe60-32fe-34e3-a413-e9bb4538ae9e/192/50.webp";
                     break;
+
                 case "Попробовать открыть":
                 case "Попробовать открыть золотым ключом":
                     if (IsRaidMode)
@@ -288,21 +298,25 @@ namespace ThiefVladislavBot
                     LocationsToGo = new List<string>() { "КОНЕЦ?" };
                     IsOver = true;
                     break;
+
                 case "":
                     textToSay = "";
                     LocationsToGo = new List<string>() { "КОНЕЦ." };
                     break;
+
                 case "Вспомнить лучшие моменты жизни":
                     textToSay = "Дядя медленно зашел на кухню. Медленно закрыл дверь. Медленно достал дробовик. И быстро распределил ваши внутренности по дверце холодильника.";
                     LocationsToGo = new List<string>() { "КОНЕЦ." };
                     sticker = "https://cdn.tlgrm.app/stickers/e3a/27d/e3a27d19-e86a-4932-9a27-1bbcca58d75a/192/2.webp";
                     break;
+
                 case "Попробовать открыть ржавым ключом":
                     textToSay = "Пызы.";
                     LocationsToGo = new List<string>() { "Good Ending" };
                     IsOver = true;
                     sticker = "https://www.amigoss.eu/wp-content/uploads/2019/01/Amigos_mockup_pyzy_z_miesem_1.png";
                     break;
+
                 default:
                     textToSay = _lastWords;
                     break;
@@ -310,9 +324,6 @@ namespace ThiefVladislavBot
             _lastWords = textToSay;
 
             return new Tuple<string, ReplyKeyboardMarkup, string>(textToSay, KeyboardOptimizer(LocationsToGo), sticker);
-
         }
-
-
     }
 }

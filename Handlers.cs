@@ -85,7 +85,10 @@ namespace ThiefVladislavBot
                 return;
             }
             var sentMessage = await action;
-            Console.WriteLine($"{DateTime.Now:G} Sent to: @{message.Chat.Username} - '{sentMessage.Text.Substring(0, sentMessage.Text.Length > 20 ? 20 : sentMessage.Text.Length)}'");
+            if (sentMessage.Text != null)
+                Console.WriteLine($"{DateTime.Now:G} Sent to: @{message.Chat.Username} - '{sentMessage.Text.Substring(0, sentMessage.Text.Length > 20 ? 20 : sentMessage.Text.Length)}'");
+            else if(sentMessage.Sticker != null)
+                Console.WriteLine($"{DateTime.Now:G} Sent to: @{message.Chat.Username} - 'Sticker: {sentMessage.Sticker.FileId.Substring(0, sentMessage.Sticker.FileId.Length > 20 ? 20 : sentMessage.Sticker.FileId.Length)}'");
 
             static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message, Tuple<string, ReplyKeyboardMarkup, string> toSend)
             {

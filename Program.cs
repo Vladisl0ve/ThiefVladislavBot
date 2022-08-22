@@ -1,41 +1,64 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Serilog;
+using Serilog.Events;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
+using ThiefVladislavBot.Database;
+using ThiefVladislavBot.Handlers;
+using ThiefVladislavBot.Services;
 
 namespace ThiefVladislavBot
 {
-    public static class Program
+    public class Program
     {
-        private static TelegramBotClient Bot;
-        private static IConfigurationRoot Config;
-
-        public static async Task Main()
+        public static void Main(string[] args)
         {
-            Config = new ConfigurationBuilder()
-                        .SetBasePath(Directory.GetCurrentDirectory())
-                        .AddJsonFile("config.json", false, true)
-                        .Build();
+            CreateGlobalLoggerConfiguration();
+            Log.Information("Starting host");
+            CreateHostBuilder(args).Build().Run();
+        }
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var builder = new HostBuilder()
+                  .ConfigureAppConfiguration(x =>
+                  {
+                      var conf = new ConfigurationBuilder()
+                               .SetBasePath(Directory.GetCurrentDirectory())
+                               .AddJsonFile("config.json", false, true)
+                               .Build();
 
-            Bot = new TelegramBotClient(Config["token"]);
+                      x.AddConfiguration(conf);
+                  })
+                  .UseSerilog()
+                  .ConfigureServices((context, services) =>
+                  {
+                      services.AddHostedService<TelegramBotHostedService>();
+                      services.AddTransient<IUpdateHandler, UpdateHandler>();
+                      services.AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(context.Configuration["TokenBot"]));
 
-            var me = await Bot.GetMeAsync();
-            Console.Title = me.Username;
 
-            using var cts = new CancellationTokenSource();
 
-            // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
-            Bot.StartReceiving(new DefaultUpdateHandler(Handlers.HandleUpdateAsync, Handlers.HandleErrorAsync),
-                               cts.Token);
+                      services.Configure<DatabaseSettings>(context.Configuration.GetSection(nameof(DatabaseSettings)));
+                      services.AddSingleton<IDatabaseSettings>(sp => sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
 
-            Console.WriteLine($"Start listening for @{me.Username}");
-            Console.ReadLine();
+                      services.AddSingleton<UserService>();
+                      services.AddSingleton<MessageService>();
+                      services.AddSingleton<GameService>();
+                  });
 
-            // Send cancellation request to stop bot
-            cts.Cancel();
+            return builder;
+        }
+        public static void CreateGlobalLoggerConfiguration()
+        {
+            Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+            .MinimumLevel.Override("System", LogEventLevel.Warning)
+            .WriteTo.Console().CreateLogger();
         }
     }
 }

@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using ThiefVladislavBot.Models;
 
-namespace ThiefVladislavBot
+namespace ThiefVladislavBot.Controllers
 {
-    public class Game
+    public class GameController
     {
+        private long _chatId;
+        private long _userId;
+        private string _msgId;
         public List<string> LocationsToGo { get; set; }
         public string LocationRightNow { get; set; }
 
@@ -46,10 +50,10 @@ namespace ThiefVladislavBot
         public bool IsMadeBed { get; set; }
         public bool IsUnmadeBed { get; set; }
         public bool IsRaidMode { get; set; }
-        private string _lastWords = "";
-        private string _lastSticker = "";
+        public string LastWords { get; set; }
+        public string LastSticker { get; set; }
 
-        public Game()
+        public GameController(long userId, long chatId, string msgId)
         {
             LocationsToGo = new List<string>() { "Осмотреться", "Зал", "Туалет" };
             LocationRightNow = "Прихожая";
@@ -62,7 +66,29 @@ namespace ThiefVladislavBot
             DidAttackByRustyKey = false;
             DidAttackByGoldenKey = false;
             IsRaidMode = false;
+            LastSticker = "";
+            LastWords = "";
+            _userId = userId;
+            _chatId = chatId;
+            _msgId = msgId;
         }
+        public GameController(GameModel game, long userId, long chatId, string msgId) : this(userId, chatId, msgId)
+        {
+            LocationsToGo = game.LocationsToGo;
+            LocationRightNow = game.LocationRightNow;
+            IsGoldenKey = game.IsGoldenKey;
+            IsRustyKey = game.IsRustyKey;
+            IsOver = game.IsOver;
+            IsWCVisited = game.IsWCVisited;
+            IsMadeBed = game.IsMadeBed;
+            IsUnmadeBed = game.IsUnmadeBed;
+            DidAttackByRustyKey = game.DidAttackByRustyKey;
+            DidAttackByGoldenKey = game.DidAttackByGoldenKey;
+            IsRaidMode = game.IsRaidMode;
+            LastWords = game.LastWords;
+            LastSticker = game.LastSticker;
+        }
+
 
         private ReplyKeyboardMarkup KeyboardOptimizer(List<string> names)
         {
@@ -96,10 +122,10 @@ namespace ThiefVladislavBot
         public Tuple<string, ReplyKeyboardMarkup, string> StartGame()
         {
             string text = "Вы вор Владислав. Вы забрались в квартиру своего дяди в шабанах и стоите в прихожей.";
-            _lastWords = text;
+            LastWords = text;
             var keyboard = KeyboardOptimizer(LocationsToGo);
             string sticker = "https://tlgrm.ru/_/stickers/4dd/300/4dd300fd-0a89-3f3d-ac53-8ec93976495e/192/115.webp";
-            _lastSticker = sticker;
+            LastSticker = sticker;
             return new Tuple<string, ReplyKeyboardMarkup, string>(text, keyboard, sticker);
         }
 
@@ -318,12 +344,36 @@ namespace ThiefVladislavBot
                     break;
 
                 default:
-                    textToSay = _lastWords;
+                    textToSay = LastWords;
                     break;
             }
-            _lastWords = textToSay;
+            LastWords = textToSay;
+            LastSticker = sticker;
 
             return new Tuple<string, ReplyKeyboardMarkup, string>(textToSay, KeyboardOptimizer(LocationsToGo), sticker);
+        }
+
+        public GameModel ToGameModel()
+        {
+            return new GameModel()
+            {
+                Id = _msgId,
+                DidAttackByGoldenKey = DidAttackByGoldenKey,
+                IsGoldenKey = IsGoldenKey,
+                IsMadeBed = IsMadeBed,
+                DidAttackByRustyKey = DidAttackByRustyKey,
+                IsOver = IsOver,
+                IsRaidMode = IsRaidMode,
+                IsRustyKey = IsRustyKey,
+                IsUnmadeBed = IsUnmadeBed,
+                IsWCVisited = IsWCVisited,
+                LastSticker = LastSticker,
+                LastWords = LastWords,
+                ChatId = _chatId,
+                LocationRightNow = LocationRightNow,
+                LocationsToGo = LocationsToGo,
+                UserId = _userId,
+            };
         }
     }
 }
